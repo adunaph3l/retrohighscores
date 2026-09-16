@@ -51,7 +51,7 @@ Dans le dossier, copiez le fichier d'exemple :
 ```bash
 cp .env.example .env
 ```
-Éditez le fichier `.env` avec vos paramètres :
+Éditez le fichier `env.example` avec vos paramètres et renommez le en `.env`:
 - `SECRET_KEY` : une clé secrète aléatoire de votre choix.
 - `RAWG_API_KEY` : votre clé gratuite obtenue sur [RAWG.io/apidocs](https://rawg.io/apidocs) (permet la recherche instantanée et la récupération des jaquettes/screenshots).
 - `DISCORD_WEBHOOK_URL` : l'URL de votre webhook de salon Discord.

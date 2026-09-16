@@ -1,4 +1,4 @@
-﻿// Main Retro App Interactions: Mobile Menu, Image Preview, Screenshot Modals, Countdown Timer
+// Main Retro App Interactions: Mobile Menu, Image Preview, Screenshot Modals, Countdown Timer
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Mobile Menu Toggle
@@ -17,21 +17,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('screenshot-input');
     const previewContainer = document.getElementById('preview-container');
     const previewImg = document.getElementById('preview-img');
+    const heicNotice = document.getElementById('heic-notice');
 
     if (fileInput && previewImg) {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                const fileName = (file.name || '').toLowerCase();
+                const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     previewImg.src = event.target.result;
+                    previewImg.style.display = 'block';
                     if (previewContainer) {
                         previewContainer.style.display = 'block';
+                    }
+                    if (heicNotice) {
+                        heicNotice.style.display = isHeic ? 'block' : 'none';
                     }
                     if (window.retroAudio) {
                         window.retroAudio.playCoin();
                     }
                 };
+
+                // Fallback for desktop browsers (Chrome/Firefox on PC) that cannot render raw HEIC data URLs
+                previewImg.onerror = () => {
+                    if (isHeic) {
+                        previewImg.style.display = 'none';
+                        if (heicNotice) {
+                            heicNotice.style.display = 'block';
+                            heicNotice.innerHTML = `📸 <strong>${file.name}</strong><br>Format Apple iPhone HEIC détecté ! Votre photo sera convertie et visible en haute définition dès l'envoi.`;
+                        }
+                    }
+                };
+
                 reader.readAsDataURL(file);
             }
         });

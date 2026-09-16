@@ -1,0 +1,94 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Hall of Fame - Classement Général{% endblock %}
+
+{% block content %}
+<div class="nes-container is-dark with-title">
+    <p class="title nes-text is-warning">🏆 HALL OF FAME - CLASSEMENT GÉNÉRAL</p>
+    
+    <p style="margin-bottom: 1.5rem;">
+        Le Panthéon des Maîtres de l'Arcade ! Les points sont cumulés à chaque fin de challenge selon vos performances.
+    </p>
+
+    {% if users %}
+        <div class="table-responsive">
+            <table class="nes-table is-bordered is-dark is-centered">
+                <thead>
+                    <tr>
+                        <th>Rang</th>
+                        <th>Joueur</th>
+                        <th>Points Globaux</th>
+                        <th>Trophées</th>
+                        <th>Victoires</th>
+                        <th>Défis Joués</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                {% if loop.index == 1 %}🥇 1er
+                                {% elif loop.index == 2 %}🥈 2e
+                                {% elif loop.index == 3 %}🥉 3e
+                                {% else %}#{{ loop.index }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/profile/{{ u.username }}" class="nes-text is-primary" style="text-decoration: none;">
+                                    {{ u.username }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="nes-text is-warning" style="font-size: 13px; font-weight: bold;">
+                                    {{ u.total_points }} PTS
+                                </span>
+                            </td>
+                            <td>
+                                <i class="nes-icon trophy is-small"></i> {{ u.trophies_count }}
+                            </td>
+                            <td>
+                                {% if u.wins_count > 0 %}
+                                    <span class="nes-text is-success">⭐ {{ u.wins_count }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ u.participations_count }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem;">
+            <p class="nes-text is-disabled">Aucun joueur n'a encore marqué de points.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Barème des points -->
+<div class="nes-container is-dark with-title" style="margin-top: 2rem;">
+    <p class="title nes-text is-success">📊 BARÈME D'ATTRIBUTION DES POINTS</p>
+    <div class="retro-grid" style="font-size: 10px;">
+        <div class="nes-container is-rounded is-dark">
+            <p class="nes-text is-warning">PODIUM :</p>
+            <p>🥇 1ère place : <strong>100 points</strong></p>
+            <p>🥈 2ème place : <strong>75 points</strong></p>
+            <p>🥉 3ème place : <strong>50 points</strong></p>
+        </div>
+        <div class="nes-container is-rounded is-dark">
+            <p class="nes-text is-primary">TOP 10 :</p>
+            <p>4ème place : <strong>35 points</strong></p>
+            <p>5ème place : <strong>25 points</strong></p>
+            <p>6e au 10e : <strong>15 points</strong></p>
+        </div>
+        <div class="nes-container is-rounded is-dark">
+            <p class="nes-text is-success">PARTICIPATION :</p>
+            <p>Tout autre score validé : <strong>10 points</strong></p>
+            <p class="nes-text is-disabled">Participer rapporte toujours des points pour grimper au Panthéon !</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

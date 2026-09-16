@@ -1,0 +1,64 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Archives des Challenges{% endblock %}
+
+{% block content %}
+<div class="nes-container is-dark with-title">
+    <p class="title nes-text is-warning">📜 ARCHIVES DES CHALLENGES PASSÉS</p>
+    <p style="margin-bottom: 1.5rem;">
+        Retrouvez tous les défis passés de la salle d'arcade, les jeux d'anthologie et les podiums des champions !
+    </p>
+
+    {% if challenges %}
+        <div class="retro-grid">
+            {% for c in challenges %}
+                <div class="nes-container is-rounded is-dark" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <img src="{{ c.game.screenshot_image or c.game.cover_image or '/static/img/default-game.svg' }}" 
+                                 alt="{{ c.game.name }}" 
+                                 style="width: 100%; height: 160px; object-fit: cover; border: 3px solid #ffffff;"
+                                 onerror="this.src='/static/img/default-game.svg';">
+                            <span class="nes-badge" style="margin-top: 0.5rem;"><span class="is-primary">{{ c.game.platform }}</span></span>
+                        </div>
+
+                        <h3 style="font-size: 1rem; color: var(--retro-gold); margin-bottom: 0.5rem;">
+                            {{ c.title }}
+                        </h3>
+                        <p class="nes-text is-disabled" style="font-size: 9px; margin-bottom: 0.8rem;">
+                            Jeu : {{ c.game.name }} • Clôturé le {{ c.end_date.strftime('%d/%m/%Y') }}
+                        </p>
+
+                        <!-- Podium ou Vainqueur -->
+                        <div class="nes-container is-dark" style="padding: 0.6rem; margin-bottom: 1rem; border-color: #f7d51d;">
+                            {% if c.results %}
+                                <p style="font-size: 9px; color: var(--retro-gold); margin-bottom: 0.4rem;">🏆 PODIUM FINAL :</p>
+                                {% for r in c.results[:3] %}
+                                    <p style="font-size: 8px; margin-bottom: 0.2rem;">
+                                        {% if r.rank == 1 %}🥇 1er : <strong>{{ r.user.username }}</strong> ({{ "{:,}".format(r.final_score).replace(",", " ") }} pts)
+                                        {% elif r.rank == 2 %}🥈 2e : {{ r.user.username }} ({{ "{:,}".format(r.final_score).replace(",", " ") }})
+                                        {% elif r.rank == 3 %}🥉 3e : {{ r.user.username }} ({{ "{:,}".format(r.final_score).replace(",", " ") }})
+                                        {% endif %}
+                                    </p>
+                                {% endfor %}
+                            {% else %}
+                                <p style="font-size: 9px; color: #888; margin-bottom: 0;">Aucun participant enregistré.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <a href="/challenge/{{ c.id }}" class="nes-btn is-primary" style="width: 100%; text-align: center; font-size: 9px;">
+                        VOIR LES DÉTAILS ET SCORES
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem;">
+            <p class="nes-text is-disabled">Aucun challenge n'a encore été archivé.</p>
+            <p>Le premier challenge est en cours ou va bientôt commencer !</p>
+            <a href="/" class="nes-btn is-success" style="margin-top: 1rem;">VOIR LE CHALLENGE ACTUEL</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

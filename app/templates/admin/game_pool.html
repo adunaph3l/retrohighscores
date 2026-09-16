@@ -1,0 +1,225 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Pool de Jeux & Tirage Aléatoire{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="/admin" class="nes-btn is-primary" style="font-size: 9px;">&laquo; Retour Console Admin</a>
+</div>
+
+<div class="nes-container is-dark with-title">
+    <p class="title nes-text is-warning">🎲 POOL DE JEUX &amp; TIRAGE ALÉATOIRE</p>
+
+    <!-- Section Roulette Tirage au Sort -->
+    <div class="nes-container is-rounded is-dark" style="text-align: center; margin-bottom: 2rem; border-color: var(--retro-gold);">
+        <h3 style="color: var(--retro-gold); font-size: 1.1rem; margin-bottom: 1rem;">
+            🎰 ROULETTE ARCADE : TIRAGE DU PROCHAIN JEU
+        </h3>
+        
+        <div id="random-roll-display" style="min-height: 45px; font-size: 1.1rem; margin-bottom: 1.2rem;">
+            Prêt pour le tirage au sort !
+        </div>
+
+        <button type="button" class="nes-btn is-warning" id="btn-roll-game" onclick="window.rollRandomGame()">
+            🎲 LANCER LE TIRAGE ALÉATOIRE
+        </button>
+    </div>
+
+    <!-- Section Import en Masse (Fichier ou Liste) -->
+    <div class="nes-container is-rounded is-dark with-title" style="margin-bottom: 2rem; border-color: var(--retro-green);">
+        <p class="title nes-text is-success">📥 IMPORT EN MASSE (FICHIER .TXT / .CSV OU LISTE)</p>
+
+        <p style="font-size: 10px; margin-bottom: 1rem;">
+            Ajoutez rapidement des dizaines ou centaines de jeux à votre catalogue d'un seul coup !<br>
+            Pour chaque titre, le système interroge automatiquement <strong>RAWG.io</strong> pour télécharger les jaquettes officielles et les captures d'écran en jeu.
+        </p>
+
+        <form action="/admin/game-pool/import-batch" method="post" enctype="multipart/form-data" id="import-batch-form">
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="batch_file">1. TÉLÉVERSER UN FICHIER (.TXT OU .CSV) :</label>
+                <input type="file" id="batch_file" name="file" class="nes-input is-dark" accept=".txt,.csv">
+                <p style="font-size: 8px; color: #aaa; margin-top: 4px;">
+                    Format : Un jeu par ligne (ex: <code>Metal Slug</code> ou <code>Street Fighter 2, Arcade</code>)
+                </p>
+            </div>
+
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="batch_text">2. OU COLLER DIRECTEMENT VOTRE LISTE DE JEUX :</label>
+                <textarea id="batch_text" name="text_list" class="nes-input is-dark" rows="5" placeholder="Exemple :&#10;Pac-Man&#10;Donkey Kong&#10;Metal Slug, Arcade&#10;Super Mario Bros, NES&#10;Sonic The Hedgehog, Mega Drive&#10;Galaga&#10;Bubble Bobble"></textarea>
+            </div>
+
+            <button type="submit" class="nes-btn is-success" id="btn-submit-batch" style="width: 100%;">
+                🚀 IMPORTER LA LISTE &amp; CHERCHER SUR RAWG.IO
+            </button>
+            <div id="import-loading-indicator" style="display: none; text-align: center; margin-top: 1rem;" class="nes-text is-warning">
+                ⏳ Importation et récupération des visuels sur RAWG.io en cours... Veuillez patienter...
+            </div>
+        </form>
+    </div>
+
+    <!-- Section Recherche Unitaire & Ajout via RAWG -->
+    <div class="nes-container is-rounded is-dark with-title" style="margin-bottom: 2rem;">
+        <p class="title nes-text is-primary">🔍 RECHERCHE UNITAIRE (RAWG.IO)</p>
+
+        <form id="rawg-search-form" onsubmit="searchRawg(event)">
+            <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <input type="text" id="rawg-query" class="nes-input is-dark" style="flex: 1; min-width: 240px;" placeholder="Ex: Metal Slug, Donkey Kong, Castlevania..." required>
+                <button type="submit" class="nes-btn is-success">CHERCHER</button>
+            </div>
+        </form>
+
+        <div id="search-loading" style="display: none; text-align: center; padding: 1rem;" class="nes-text is-warning">
+            Recherche en cours dans la base de données rétro...
+        </div>
+
+        <div id="search-results" class="retro-grid" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- Section Formulaire Manuel Rapide -->
+    <details class="nes-container is-rounded is-dark" style="margin-bottom: 2rem;">
+        <summary class="nes-text is-disabled" style="cursor: pointer; font-size: 10px;">➕ Ou ajouter manuellement un jeu personnalisé</summary>
+        <form action="/admin/game-pool/add-manual" method="post" style="margin-top: 1rem;">
+            <div class="nes-field" style="margin-bottom: 0.8rem;">
+                <label for="manual_name">Nom du jeu :</label>
+                <input type="text" id="manual_name" name="name" class="nes-input is-dark" required placeholder="Ex: Street Fighter II Turbo">
+            </div>
+            <div class="nes-field" style="margin-bottom: 0.8rem;">
+                <label for="manual_platform">Plateforme :</label>
+                <input type="text" id="manual_platform" name="platform" class="nes-input is-dark" placeholder="Ex: Arcade / SNES" value="Arcade">
+            </div>
+            <div class="nes-field" style="margin-bottom: 0.8rem;">
+                <label for="manual_cover">URL Capture d'écran / Jaquette :</label>
+                <input type="url" id="manual_cover" name="cover_image" class="nes-input is-dark" placeholder="https://...">
+            </div>
+            <button type="submit" class="nes-btn is-primary" style="margin-top: 0.5rem;">AJOUTER AU CATALOGUE</button>
+        </form>
+    </details>
+
+    <!-- Liste des Jeux Présents dans le Pool -->
+    <div class="nes-container is-dark with-title">
+        <p class="title nes-text is-success">📋 CATALOGUE DU POOL DE TIRAGE ({{ games|length }} JEUX)</p>
+
+        {% if games %}
+            <div class="table-responsive">
+                <table class="nes-table is-bordered is-dark is-centered">
+                    <thead>
+                        <tr>
+                            <th>Visuel</th>
+                            <th>Nom du Jeu</th>
+                            <th>Plateforme</th>
+                            <th>Dans la roulette ?</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in games %}
+                            <tr>
+                                <td>
+                                    <img src="{{ g.cover_image or '/static/img/default-game.svg' }}" 
+                                         alt="{{ g.name }}" 
+                                         style="width: 60px; height: 40px; object-fit: cover; border: 2px solid #fff;"
+                                         onerror="this.src='/static/img/default-game.svg';">
+                                </td>
+                                <td><strong>{{ g.name }}</strong></td>
+                                <td><span class="nes-badge"><span class="is-primary">{{ g.platform }}</span></span></td>
+                                <td>
+                                    {% if g.in_random_pool %}
+                                        <span class="nes-text is-success">OUI ✅</span>
+                                    {% else %}
+                                        <span class="nes-text is-disabled">NON</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.4rem; justify-content: center;">
+                                        <a href="/admin/challenge/new?game_id={{ g.id }}" class="nes-btn is-warning" style="font-size: 8px; padding: 4px 6px;">
+                                            DÉFI
+                                        </a>
+                                        <form action="/admin/game/{{ g.id }}/delete" method="post" onsubmit="return confirm('Supprimer ce jeu du catalogue ?');">
+                                            <button type="submit" class="nes-btn is-error" style="font-size: 8px; padding: 4px 6px;">
+                                                SUPPR
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="nes-text is-disabled" style="text-align: center; padding: 1.5rem;">
+                Le pool est vide ! Téléversez une liste de jeux ci-dessus pour préparer les tirages au sort.
+            </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Indicateur de chargement pour l'import batch
+document.getElementById('import-batch-form')?.addEventListener('submit', function() {
+    const btn = document.getElementById('btn-submit-batch');
+    const loading = document.getElementById('import-loading-indicator');
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('is-disabled');
+    }
+    if (loading) {
+        loading.style.display = 'block';
+    }
+    if (window.retroAudio) {
+        window.retroAudio.playClick();
+    }
+});
+
+async function searchRawg(event) {
+    event.preventDefault();
+    const query = document.getElementById('rawg-query').value.trim();
+    if (!query) return;
+
+    const loading = document.getElementById('search-loading');
+    const resultsContainer = document.getElementById('search-results');
+    loading.style.display = 'block';
+    resultsContainer.innerHTML = '';
+
+    try {
+        const res = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`);
+        const games = await res.json();
+        loading.style.display = 'none';
+
+        if (!games || games.length === 0) {
+            resultsContainer.innerHTML = '<p class="nes-text is-disabled" style="grid-column: 1/-1; text-align: center;">Aucun résultat trouvé sur RAWG.io. Vérifiez votre clé API RAWG ou ajoutez le jeu manuellement.</p>';
+            return;
+        }
+
+        games.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'nes-container is-rounded is-dark';
+            card.style.padding = '0.8rem';
+            card.innerHTML = `
+                <img src="${game.cover_image || '/static/img/default-game.svg'}" style="width: 100%; height: 130px; object-fit: cover; border: 2px solid #fff; margin-bottom: 0.5rem;" onerror="this.src='/static/img/default-game.svg';">
+                <h4 style="font-size: 10px; color: var(--retro-gold);">${game.name}</h4>
+                <p style="font-size: 8px; color: #aaa;">${game.platform}</p>
+                <form action="/admin/game-pool/add-rawg" method="post" style="margin-top: 0.5rem;">
+                    <input type="hidden" name="rawg_id" value="${game.rawg_id || ''}">
+                    <input type="hidden" name="name" value="${game.name}">
+                    <input type="hidden" name="platform" value="${game.platform}">
+                    <input type="hidden" name="cover_image" value="${game.cover_image || ''}">
+                    <input type="hidden" name="screenshot_image" value="${game.screenshot_image || ''}">
+                    <button type="submit" class="nes-btn is-success" style="width: 100%; font-size: 8px;">
+                        ➕ AJOUTER AU POOL
+                    </button>
+                </form>
+            `;
+            resultsContainer.appendChild(card);
+        });
+
+    } catch (err) {
+        loading.style.display = 'none';
+        resultsContainer.innerHTML = '<p class="nes-text is-error">Erreur lors de la recherche.</p>';
+        console.error(err);
+    }
+}
+</script>
+{% endblock %}

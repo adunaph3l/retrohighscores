@@ -1,0 +1,125 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Administration Arcade{% endblock %}
+
+{% block content %}
+<div class="nes-container is-dark with-title">
+    <p class="title nes-text is-error">⚙️ CONSOLE D'ADMINISTRATION</p>
+
+    <!-- Barre d'actions rapides -->
+    <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 2rem;">
+        <a href="/admin/challenge/new" class="nes-btn is-success">
+            ➕ NOUVEAU CHALLENGE
+        </a>
+        <a href="/admin/game-pool" class="nes-btn is-warning">
+            🎲 POOL DE JEUX &amp; TIRAGE ALÉATOIRE
+        </a>
+        <form action="/admin/discord/test" method="post" style="display: inline;">
+            <button type="submit" class="nes-btn is-primary">
+                🔔 TESTER DISCORD WEBHOOK
+            </button>
+        </form>
+    </div>
+
+    <!-- Statut du Challenge Actuel -->
+    <div class="nes-container is-rounded is-dark with-title" style="margin-bottom: 2rem; border-color: var(--retro-gold);">
+        <p class="title nes-text is-warning">🕹️ STATUT DU CHALLENGE EN COURS</p>
+
+        {% if active_challenge %}
+            <div class="hero-banner">
+                <div style="max-width: 150px;">
+                    <img src="{{ active_challenge.game.cover_image or '/static/img/default-game.svg' }}" 
+                         alt="{{ active_challenge.game.name }}"
+                         style="width: 100%; border: 2px solid #ffffff;">
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="color: var(--retro-gold); font-size: 1.1rem; margin-bottom: 0.4rem;">
+                        {{ active_challenge.title }} ({{ active_challenge.game.name }})
+                    </h3>
+                    <p style="font-size: 10px; margin-bottom: 0.5rem;">
+                        Fin prévue le : <strong>{{ active_challenge.end_date.strftime('%d/%m/%Y à %H:%M') }}</strong>
+                    </p>
+                    <p style="font-size: 10px; margin-bottom: 1rem;">
+                        Participations : <strong>{{ active_challenge.submissions|length }}</strong> scores enregistrés
+                    </p>
+
+                    <form action="/admin/challenge/{{ active_challenge.id }}/close" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir clôturer ce challenge ? Cela distribuera les points aux participants et notifiera Discord.');">
+                        <button type="submit" class="nes-btn is-error">
+                            🏁 CLÔTURER LE DÉFI &amp; DISTRIBUER LES POINTS
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 1.5rem;">
+                <p class="nes-text is-disabled">Aucun challenge actif actuellement.</p>
+                <a href="/admin/challenge/new" class="nes-btn is-success" style="margin-top: 0.5rem;">
+                    LANCER UN NOUVEAU CHALLENGE
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Dernières Soumissions de Scores -->
+    <div class="nes-container is-dark with-title">
+        <p class="title nes-text is-primary">📋 TOUTES LES SOUMISSIONS RÉCENTES</p>
+
+        {% if submissions %}
+            <div class="table-responsive">
+                <table class="nes-table is-bordered is-dark is-centered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Joueur</th>
+                            <th>Challenge</th>
+                            <th>Score</th>
+                            <th>Preuve</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in submissions %}
+                            <tr>
+                                <td>#{{ s.id }}</td>
+                                <td>{{ s.user.username }}</td>
+                                <td>{{ s.challenge.title }}</td>
+                                <td><span class="nes-text is-warning">{{ "{:,}".format(s.score).replace(",", " ") }}</span></td>
+                                <td>
+                                    <img src="{{ s.screenshot_path }}" 
+                                         alt="Preuve" 
+                                         class="score-thumbnail view-screenshot-btn"
+                                         data-screenshot="{{ s.screenshot_path }}"
+                                         data-user="{{ s.user.username }}"
+                                         data-score="{{ '{:,}'.format(s.score).replace(',', ' ') }}">
+                                </td>
+                                <td style="font-size: 9px;">{{ s.created_at.strftime('%d/%m %H:%M') }}</td>
+                                <td>
+                                    <form action="/admin/submission/{{ s.id }}/delete" method="post" onsubmit="return confirm('Supprimer ce score ?');" style="display:inline;">
+                                        <button type="submit" class="nes-btn is-error" style="font-size: 8px; padding: 4px 6px;">❌ SUPPR</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="nes-text is-disabled" style="text-align: center; padding: 1rem;">Aucune soumission enregistrée.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Dialog Agrandissement -->
+<dialog class="nes-dialog is-dark is-rounded" id="screenshot-modal">
+    <form method="dialog">
+        <p class="title nes-text is-warning">
+            PREUVE : <span id="modal-screenshot-user"></span> (<span id="modal-screenshot-score"></span> PTS)
+        </p>
+        <img src="" alt="Capture zoomée" id="modal-screenshot-img" class="modal-img">
+        <menu class="dialog-menu" style="text-align: center; margin-top: 1rem;">
+            <button class="nes-btn is-primary">FERMER</button>
+        </menu>
+    </form>
+</dialog>
+{% endblock %}

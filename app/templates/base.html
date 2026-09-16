@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Retro High Scores{% endblock %} - Arcade Leaderboard</title>
+    
+    <!-- NES.css Local with CDN Fallback -->
+    <link rel="stylesheet" href="/static/css/nes.min.css">
+    
+    <!-- Custom Retro CSS & Mobile Responsive Adaptations -->
+    <link rel="stylesheet" href="/static/css/retro-custom.css">
+    
+    <!-- Google Font Press Start 2P -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="alternate icon" href="/static/img/favicon.svg">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- CRT Scanlines Overlay (Toggleable via button) -->
+    <div class="crt-overlay" id="crt-overlay"></div>
+
+    <!-- Retro Arcade Header -->
+    <header class="retro-header">
+        <div class="container header-inner">
+            <a href="/" class="brand-title">
+                <i class="nes-icon coin is-small"></i> RETRO SCORES
+            </a>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="nes-btn is-primary mobile-menu-toggle" id="mobile-menu-btn" type="button" aria-label="Menu">
+                ☰
+            </button>
+
+            <!-- Navigation Links -->
+            <nav class="retro-nav" id="retro-nav-menu">
+                <a href="/" class="nes-btn is-warning">🕹️ Challenge Actif</a>
+                <a href="/archive" class="nes-btn">📜 Archives</a>
+                <a href="/leaderboard" class="nes-btn is-success">🏆 Hall of Fame</a>
+
+                {% if current_user %}
+                    {% if current_user.is_admin %}
+                        <a href="/admin" class="nes-btn is-error">⚙️ Admin</a>
+                    {% endif %}
+                    <a href="/profile/{{ current_user.username }}" class="nes-btn is-primary">
+                        👤 {{ current_user.username }} ({{ current_user.total_points }} pts)
+                    </a>
+                    <a href="/auth/logout" class="nes-btn">Quitter</a>
+                {% else %}
+                    <a href="/auth/login" class="nes-btn is-primary">Connexion</a>
+                    <a href="/auth/register" class="nes-btn is-success">Inscription</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container main-content">
+        <!-- Flash Notification Messages -->
+        {% if flash_message %}
+            <div class="flash-container">
+                <div class="nes-container is-rounded is-dark">
+                    <p class="nes-text {{ flash_type or 'is-warning' }}">{{ flash_message }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Secret Konami Code Retro Dialog -->
+    <dialog class="nes-dialog is-dark is-rounded" id="konami-dialog">
+        <form method="dialog">
+            <p class="title nes-text is-warning">✨ CODE KONAMI DÉVERROUILLÉ ! ✨</p>
+            <p style="margin: 1rem 0;">
+                <i class="nes-icon trophy is-medium"></i> Félicitations joueur rétro !<br><br>
+                Vous venez d'activer le code secret des légendes !<br>
+                Le trophée <strong>"Code Konami"</strong> a été ajouté à votre profil !
+            </p>
+            <menu class="dialog-menu" style="text-align: center; margin-top: 1.5rem;">
+                <button class="nes-btn is-success" onclick="if(window.retroAudio) window.retroAudio.playCoin();">CONTINUER</button>
+            </menu>
+        </form>
+    </dialog>
+
+    <!-- Retro Footer -->
+    <footer class="retro-footer">
+        <div class="container">
+            <div class="footer-controls">
+                <button type="button" class="nes-btn is-success" id="retro-sound-btn" onclick="window.retroAudio.toggleMute()">
+                    🔊 SON: ON
+                </button>
+                <button type="button" class="nes-btn is-disabled" id="retro-crt-btn" onclick="toggleCrtMode()">
+                    📺 CRT: OFF
+                </button>
+            </div>
+            <p style="margin-bottom: 0.5rem;">
+                <i class="nes-icon heart is-small"></i> RETRO HIGH SCORES &copy; 2026 • ARCADE SELF-HOSTED
+            </p>
+            <p style="color: #777; font-size: 8px;">
+                Propulsé par NES.css &amp; Unraid • <em>Indice : ↑ ↑ ↓ ↓ ← → ← → B A</em>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Scripts -->
+    <script src="/static/js/retro-audio.js"></script>
+    <script src="/static/js/easter-eggs.js"></script>
+    <script src="/static/js/main.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

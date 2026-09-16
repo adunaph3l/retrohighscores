@@ -1,0 +1,82 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Créer un Challenge{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="/admin" class="nes-btn is-primary" style="font-size: 9px;">&laquo; Retour Console Admin</a>
+</div>
+
+<div class="nes-container is-dark with-title" style="max-width: 750px; margin: 0 auto;">
+    <p class="title nes-text is-success">🕹️ NOUVEAU CHALLENGE D'ARCADE</p>
+
+    <!-- Roulette de Tirage Aléatoire Rapide -->
+    <div class="nes-container is-rounded is-dark" style="text-align: center; margin-bottom: 1.5rem; border-color: var(--retro-gold);">
+        <p style="font-size: 10px; color: var(--retro-gold); margin-bottom: 0.5rem;">
+            🎰 HÉSITANT ? TIREZ UN JEU AU SORT PARMI LE POOL :
+        </p>
+        <div id="random-roll-display" style="min-height: 35px; font-size: 11px; margin-bottom: 0.8rem;">
+            Cliquez sur le bouton ci-dessous pour lancer la roulette !
+        </div>
+        <button type="button" class="nes-btn is-warning" id="btn-roll-game" onclick="window.rollRandomGame()">
+            🎲 TIRER UN JEU ALÉATOIREMENT
+        </button>
+    </div>
+
+    <form action="/admin/challenge/new" method="post">
+        <div class="nes-field" style="margin-bottom: 1.2rem;">
+            <label for="game-select">CHOISIR LE JEU :</label>
+            <div class="nes-select is-dark">
+                <select id="game-select" name="game_id" required>
+                    <option value="" disabled selected>-- Sélectionnez un jeu --</option>
+                    {% for g in games %}
+                        <option value="{{ g.id }}" {% if selected_game_id == g.id %}selected{% endif %}>
+                            {{ g.name }} [{{ g.platform }}]
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <p style="font-size: 8px; color: #888; margin-top: 4px;">
+                Vous pouvez ajouter d'autres jeux dans le <a href="/admin/game-pool" class="nes-text is-primary">Pool de Jeux</a>.
+            </p>
+        </div>
+
+        <div class="nes-field" style="margin-bottom: 1.2rem;">
+            <label for="title">TITRE DU CHALLENGE :</label>
+            <input type="text" id="title" name="title" class="nes-input is-dark" placeholder="Ex: Tournoi Rétro #1 : Metal Slug" required>
+        </div>
+
+        <div class="nes-field" style="margin-bottom: 1.2rem;">
+            <label for="description">DESCRIPTION / CONTEXTE :</label>
+            <textarea id="description" name="description" class="nes-input is-dark" rows="3" placeholder="Description du défi, histoire du jeu..."></textarea>
+        </div>
+
+        <div class="nes-field" style="margin-bottom: 1.2rem;">
+            <label for="rules">RÈGLES DU DÉFI :</label>
+            <input type="text" id="rules" name="rules" class="nes-input is-dark" value="1 Crédit (Pas de Continue), Difficulté normale par défaut, Photo nette obligatoire !" required>
+        </div>
+
+        <div class="retro-grid-2col" style="margin-bottom: 1.2rem;">
+            <div class="nes-field">
+                <label for="start_date">DATE &amp; HEURE DÉBUT :</label>
+                <input type="datetime-local" id="start_date" name="start_date" class="nes-input is-dark" value="{{ default_start }}" required>
+            </div>
+            <div class="nes-field">
+                <label for="end_date">DATE &amp; HEURE FIN :</label>
+                <input type="datetime-local" id="end_date" name="end_date" class="nes-input is-dark" value="{{ default_end }}" required>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label>
+                <input type="checkbox" class="nes-checkbox is-dark" name="notify_discord" value="yes" checked>
+                <span>Envoyer l'annonce sur le Webhook Discord 🔔</span>
+            </label>
+        </div>
+
+        <button type="submit" class="nes-btn is-success" style="width: 100%;">
+            🚀 LANCER LE CHALLENGE OFFICIEL
+        </button>
+    </form>
+</div>
+{% endblock %}

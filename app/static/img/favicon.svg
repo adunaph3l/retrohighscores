@@ -1,0 +1,59 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#1a1c23"/>
+  <rect x="1" y="1" width="30" height="30" rx="5" fill="none" stroke="#92cc41" stroke-width="1.5" stroke-opacity="0.35"/>
+  <!-- Space Invader Alien (Crab) 11x8 at 2x scale -->
+  <!-- Row 0 -->
+  <rect x="9" y="8" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="8" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 1 -->
+  <rect x="11" y="10" width="2" height="2" fill="#92cc41"/>
+  <rect x="19" y="10" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 2 -->
+  <rect x="9" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="11" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="13" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="15" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="17" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="19" y="12" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="12" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 3 (Eyes at x=11 and x=19 empty) -->
+  <rect x="7" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="9" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="13" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="15" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="17" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="14" width="2" height="2" fill="#92cc41"/>
+  <rect x="23" y="14" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 4 (Full body 11 pixels) -->
+  <rect x="5" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="7" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="9" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="11" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="13" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="15" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="17" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="19" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="23" y="16" width="2" height="2" fill="#92cc41"/>
+  <rect x="25" y="16" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 5 -->
+  <rect x="5" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="9" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="11" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="13" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="15" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="17" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="19" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="18" width="2" height="2" fill="#92cc41"/>
+  <rect x="25" y="18" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 6 -->
+  <rect x="5" y="20" width="2" height="2" fill="#92cc41"/>
+  <rect x="9" y="20" width="2" height="2" fill="#92cc41"/>
+  <rect x="21" y="20" width="2" height="2" fill="#92cc41"/>
+  <rect x="25" y="20" width="2" height="2" fill="#92cc41"/>
+  <!-- Row 7 -->
+  <rect x="11" y="22" width="2" height="2" fill="#92cc41"/>
+  <rect x="13" y="22" width="2" height="2" fill="#92cc41"/>
+  <rect x="17" y="22" width="2" height="2" fill="#92cc41"/>
+  <rect x="19" y="22" width="2" height="2" fill="#92cc41"/>
+</svg>

@@ -1,0 +1,30 @@
+﻿version: '3.8'
+
+services:
+  retro-highscores:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retro-highscores
+    restart: unless-stopped
+    ports:
+      - "8080:8000"
+    volumes:
+      # Persistent storage on Unraid (ex: /mnt/user/appdata/retro-highscores/data)
+      - ./data:/app/data
+      # Uploaded high score proofs & game visuals
+      - ./uploads:/app/uploads
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-retro-secret-arcade-token-change-in-prod-2026}
+      - DATABASE_URL=sqlite:////app/data/highscores.db
+      - UPLOAD_DIR=/app/uploads
+      - RAWG_API_KEY=${RAWG_API_KEY:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - ADMIN_INITIAL_USERNAME=${ADMIN_INITIAL_USERNAME:-admin}
+      - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-admin1234}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

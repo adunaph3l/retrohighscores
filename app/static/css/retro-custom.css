@@ -1,0 +1,398 @@
+﻿/* Retro Custom Styles & Mobile Responsiveness Enhancements for NES.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --retro-bg: #212529;
+    --retro-card-bg: #2b2e38;
+    --retro-text: #ffffff;
+    --retro-gold: #f7d51d;
+    --retro-red: #e76e55;
+    --retro-green: #92cc41;
+    --retro-blue: #209cee;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--retro-bg);
+    color: var(--retro-text);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container Wrapper */
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Retro Header & Navigation */
+.retro-header {
+    background-color: #000000;
+    border-bottom: 4px solid #ffffff;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.brand-title {
+    font-size: 1.1rem;
+    color: var(--retro-gold);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-title:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* Nav Menu Desktop */
+.retro-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.retro-nav a {
+    text-decoration: none;
+    font-size: 10px;
+}
+
+.mobile-menu-toggle {
+    display: none;
+}
+
+/* Flash Messages */
+.flash-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Content Area */
+.main-content {
+    flex: 1;
+    padding: 1.5rem 0;
+}
+
+/* NES Container Dark Theme Tweaks */
+.nes-container.is-dark {
+    background-color: var(--retro-card-bg);
+    margin-bottom: 1.5rem;
+}
+
+.nes-container.is-rounded {
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Grid */
+.retro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.retro-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Hero Section */
+.hero-banner {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.hero-img-container {
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+    text-align: center;
+}
+
+.hero-img {
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: cover;
+    border: 4px solid #ffffff;
+    image-rendering: pixelated;
+}
+
+.hero-info {
+    flex: 1.2;
+    min-width: 280px;
+}
+
+.countdown-box {
+    margin: 1rem 0;
+    padding: 0.8rem;
+    border: 3px dashed var(--retro-gold);
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--retro-gold);
+}
+
+/* Tables Responsive Wrapper */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+}
+
+.nes-table.is-dark {
+    width: 100%;
+    min-width: 550px;
+    font-size: 11px;
+}
+
+.nes-table th, .nes-table td {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Screenshot Thumbnail & Zoom */
+.score-thumbnail {
+    width: 70px;
+    height: 48px;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.score-thumbnail:hover {
+    transform: scale(1.15);
+}
+
+/* Dialog / Modal */
+.nes-dialog {
+    background-color: var(--retro-card-bg);
+    color: #ffffff;
+    border: 4px solid #ffffff;
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 1.5rem;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.nes-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.modal-img {
+    max-width: 100%;
+    max-height: 65vh;
+    border: 3px solid #ffffff;
+    display: block;
+    margin: 1rem auto;
+}
+
+/* Trophies Case / Badges */
+.trophy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.trophy-card {
+    padding: 1rem;
+    text-align: center;
+    border: 3px solid #ffffff;
+    background-color: #1a1c23;
+}
+
+.trophy-card.is-locked {
+    opacity: 0.35;
+    filter: grayscale(1);
+}
+
+.trophy-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* CRT Scanlines Overlay Effect */
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+}
+
+body.crt-active .crt-overlay {
+    display: block;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.35) 50%
+    ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.04),
+        rgba(0, 255, 0, 0.02),
+        rgba(0, 0, 255, 0.04)
+    );
+    background-size: 100% 4px, 6px 100%;
+}
+
+/* Pixel Confetti */
+.pixel-confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.pixel-confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+}
+
+/* Retro Footer */
+.retro-footer {
+    background-color: #000000;
+    border-top: 4px solid #ffffff;
+    padding: 1.5rem 0;
+    text-align: center;
+    font-size: 10px;
+    margin-top: auto;
+}
+
+.footer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+}
+
+/* ===================================================
+   MOBILE RESPONSIVENESS ADJUSTMENTS (Phones & Tablets)
+   =================================================== */
+
+@media (max-width: 768px) {
+    body {
+        font-size: 10px;
+    }
+
+    .container {
+        padding: 0.6rem;
+    }
+
+    .brand-title {
+        font-size: 0.95rem;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    /* Mobile Nav Drawer */
+    .retro-nav {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 2px dashed #ffffff;
+    }
+
+    .retro-nav.is-open {
+        display: flex;
+    }
+
+    .retro-nav .nes-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 9px;
+        padding: 8px 10px;
+    }
+
+    .retro-grid-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-banner {
+        flex-direction: column;
+    }
+
+    .hero-img-container, .hero-info {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Make NES Containers fit narrow mobile screens */
+    .nes-container {
+        padding: 1rem 0.6rem !important;
+    }
+
+    .nes-container.with-title > .title {
+        font-size: 10px;
+        margin-top: -1.6rem;
+        padding: 0 4px;
+    }
+
+    .countdown-box {
+        font-size: 0.9rem;
+    }
+
+    /* Mobile friendly form buttons */
+    .nes-btn {
+        font-size: 9px;
+        padding: 8px 12px;
+    }
+
+    .score-thumbnail {
+        width: 50px;
+        height: 35px;
+    }
+}

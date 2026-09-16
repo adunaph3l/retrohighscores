@@ -1,0 +1,173 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Accueil - Challenge Actif{% endblock %}
+
+{% block content %}
+{% if challenge %}
+    <!-- Hero Banner : Challenge Actif -->
+    <div class="nes-container is-dark with-title">
+        <p class="title nes-text is-warning">🕹️ DÉFI ARCADE DU MOMENT</p>
+        
+        <div class="hero-banner">
+            <!-- Game Screenshot / Cover from Internet -->
+            <div class="hero-img-container">
+                <img src="{{ challenge.game.screenshot_image or challenge.game.cover_image or '/static/img/default-game.svg' }}" 
+                     alt="{{ challenge.game.name }}" 
+                     class="hero-img"
+                     onerror="this.src='/static/img/default-game.svg';">
+                <p style="margin-top: 0.5rem; font-size: 10px;" class="nes-text is-primary">
+                    {{ challenge.game.name }} [{{ challenge.game.platform }}]
+                </p>
+            </div>
+
+            <!-- Challenge Info & Countdown -->
+            <div class="hero-info">
+                <h2 style="font-size: 1.2rem; color: var(--retro-gold); margin-bottom: 0.8rem;">
+                    {{ challenge.title }}
+                </h2>
+                
+                <p style="margin-bottom: 0.8rem;">
+                    {{ challenge.description or "Tentez de réaliser le score le plus élevé avant la fin du temps imparti !" }}
+                </p>
+
+                <div class="nes-container is-rounded is-dark" style="padding: 0.6rem; margin-bottom: 1rem;">
+                    <p style="font-size: 10px; color: var(--retro-green); margin-bottom: 0.3rem;">📜 RÈGLES OFFICIELLES :</p>
+                    <p style="font-size: 9px; margin-bottom: 0;">{{ challenge.rules }}</p>
+                </div>
+
+                <p style="font-size: 10px; margin-bottom: 0.3rem;">TEMPS RESTANT AVANT LA CLÔTURE :</p>
+                <div class="countdown-box" id="challenge-countdown" data-end-date="{{ challenge.end_date.isoformat() }}">
+                    Calcul en cours...
+                </div>
+
+                <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem;">
+                    <a href="/challenge/{{ challenge.id }}" class="nes-btn is-success">
+                        🎯 SOUMETTRE UN SCORE
+                    </a>
+                    <a href="/challenge/{{ challenge.id }}#classement" class="nes-btn is-primary">
+                        📊 VOIR LE CLASSEMENT
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Leaderboard Top 5 -->
+    <div class="nes-container is-dark with-title" style="margin-top: 2rem;">
+        <p class="title nes-text is-success">🏆 TOP 5 ACTUEL DU CHALLENGE</p>
+        
+        {% if leaderboard %}
+            <div class="table-responsive">
+                <table class="nes-table is-bordered is-dark is-centered">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Joueur</th>
+                            <th>Score</th>
+                            <th>Preuve</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in leaderboard[:5] %}
+                            <tr>
+                                <td>
+                                    {% if entry.rank == 1 %}🥇 1er
+                                    {% elif entry.rank == 2 %}🥈 2e
+                                    {% elif entry.rank == 3 %}🥉 3e
+                                    {% else %}#{{ entry.rank }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/profile/{{ entry.username }}" class="nes-text is-primary" style="text-decoration: none;">
+                                        {{ entry.username }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="nes-text is-warning" style="font-weight: bold;">
+                                        {{ "{:,}".format(entry.score).replace(",", " ") }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <img src="{{ entry.screenshot_path }}" 
+                                         alt="Preuve de score" 
+                                         class="score-thumbnail view-screenshot-btn"
+                                         data-screenshot="{{ entry.screenshot_path }}"
+                                         data-user="{{ entry.username }}"
+                                         data-score="{{ '{:,}'.format(entry.score).replace(',', ' ') }}"
+                                         title="Cliquez pour agrandir">
+                                </td>
+                                <td style="font-size: 9px;">
+                                    {{ entry.submitted_at.strftime('%d/%m %H:%M') }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="/challenge/{{ challenge.id }}" class="nes-btn is-warning">
+                    VOIR LE CLASSEMENT COMPLET ({{ leaderboard|length }} scores)
+                </a>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem;">
+                <p class="nes-text is-disabled">AUCUN SCORE SOUMIS POUR LE MOMENT !</p>
+                <p>Soyez le premier à inscrire votre nom sur la borne d'arcade !</p>
+                <a href="/challenge/{{ challenge.id }}" class="nes-btn is-success" style="margin-top: 1rem;">
+                    INSCRIRE LE 1ER HIGH SCORE
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+{% else %}
+    <!-- Attract Screen si aucun challenge actif -->
+    <div class="nes-container is-dark is-centered" style="padding: 3rem 1rem;">
+        <i class="nes-icon trophy is-large"></i>
+        <h2 style="color: var(--retro-gold); margin: 1.5rem 0 1rem 0;">AUCUN CHALLENGE EN COURS</h2>
+        <p class="nes-text is-disabled">La salle d'arcade prépare la prochaine borne...</p>
+        
+        <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="/archive" class="nes-btn is-primary">CONSULTER LES ARCHIVES</a>
+            <a href="/leaderboard" class="nes-btn is-success">VOIR LE HALL OF FAME</a>
+            {% if current_user and current_user.is_admin %}
+                <a href="/admin/challenge/new" class="nes-btn is-warning">LANCER UN NOUVEAU DÉFI</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Guide : Comment participer -->
+<div class="nes-container is-dark with-title" style="margin-top: 2rem;">
+    <p class="title nes-text is-primary">📖 COMMENT PARTICIPER ?</p>
+    <div class="retro-grid">
+        <div class="nes-container is-rounded is-dark" style="text-align: center;">
+            <p class="nes-text is-warning">1. JOUEZ</p>
+            <p style="font-size: 10px;">Lancez le jeu sur votre console, borne arcade ou émulateur préféré dans les règles du challenge.</p>
+        </div>
+        <div class="nes-container is-rounded is-dark" style="text-align: center;">
+            <p class="nes-text is-warning">2. CAPTUREZ</p>
+            <p style="font-size: 10px;">Prenez une photo ou capture d'écran nette de votre score final affiché à l'écran.</p>
+        </div>
+        <div class="nes-container is-rounded is-dark" style="text-align: center;">
+            <p class="nes-text is-warning">3. POSTEZ &amp; GAGNEZ</p>
+            <p style="font-size: 10px;">Soumettez votre score avec la preuve photo. Remportez des points pour le Hall of Fame !</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dialog pour Agrandir une Capture d'Écran -->
+<dialog class="nes-dialog is-dark is-rounded" id="screenshot-modal">
+    <form method="dialog">
+        <p class="title nes-text is-warning">
+            PREUVE : <span id="modal-screenshot-user"></span> (<span id="modal-screenshot-score"></span> PTS)
+        </p>
+        <img src="" alt="Capture zoomée" id="modal-screenshot-img" class="modal-img">
+        <menu class="dialog-menu" style="text-align: center; margin-top: 1rem;">
+            <button class="nes-btn is-primary">FERMER</button>
+        </menu>
+    </form>
+</dialog>
+{% endblock %}

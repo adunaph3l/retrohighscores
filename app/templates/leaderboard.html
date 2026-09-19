@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Hall of Fame - Classement Général{% endblock %}
 
@@ -34,8 +34,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="/profile/{{ u.username }}" class="nes-text is-primary" style="text-decoration: none;">
-                                    {{ u.username }}
+                                <a href="/profile/{{ u.username }}" class="nes-text is-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center;">
+                                    {% if u.avatar_image %}
+                                        <img src="{{ u.avatar_image }}" alt="" style="width: 20px; height: 20px; object-fit: cover; border-radius: 2px; border: 1px solid #fff;">
+                                    {% endif %}
+                                    <span>{{ u.username }}</span>
                                 </a>
                             </td>
                             <td>

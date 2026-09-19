@@ -130,8 +130,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="/profile/{{ entry.username }}" class="nes-text is-primary" style="text-decoration: none;">
-                                    {{ entry.username }}
+                                <a href="/profile/{{ entry.username }}" class="nes-text is-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center;">
+                                    {% if entry.user and entry.user.avatar_image %}
+                                        <img src="{{ entry.user.avatar_image }}" alt="" style="width: 18px; height: 18px; object-fit: cover; border-radius: 2px; border: 1px solid #fff;">
+                                    {% endif %}
+                                    <span>{{ entry.username }}</span>
                                 </a>
                             </td>
                             <td>

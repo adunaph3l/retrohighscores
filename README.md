@@ -109,3 +109,22 @@ Sur Unraid, toutes les données restent pérennes lors des mises à jour du cont
 
 Essayez la combinaison de touches suivante sur votre clavier :  
 `Haut, Haut, Bas, Bas, Gauche, Droite, Gauche, Droite, B, A` !
+
+---
+
+## 📝 Historique des Modifications
+
+### 19/09/2026
+- **Correction des correspondances RAWG.io** : Ajout d'une page d'édition par jeu dans le catalogue de l'administration. Elle permet de corriger une mauvaise association RAWG.io grâce à une recherche en direct avec prévisualisation des jaquettes et captures d'écran, ou d'ajuster manuellement les informations et URLs des images.
+- **Photo de profil / Avatar personnalisé** : Les joueurs peuvent désormais téléverser une photo de profil depuis leur page joueur. Le système gère tous les formats d'images (y compris HEIC/HEIF Apple iPhone), recadre automatiquement en carré centré et convertit en WebP optimisé. L'avatar apparaît sur le profil, dans la barre de navigation et sur tous les tableaux de classement.
+- **Nouveaux succès secrets masqués** : Ajout de trophées cachés dont le titre et la description restent masqués (« ??? ») tant qu'ils n'ont pas été débloqués, invitant les joueurs à explorer des actions insolites ou à les obtenir par surprise (scores insolites, horaires décalés, easter eggs, avatar personnalisé, etc.).
+- **Ajustement de l'alignement du tableau d'administration** : Amélioration du design des badges de plateformes dans le catalogue du pool de jeux pour garantir un calibrage parfait des colonnes sans aucun débordement.
+
+### 16/09/2026
+- **Prise en charge des images HEIC / HEIF (iPhone)** : Support des photos prises avec un iPhone d'Apple. Les fichiers HEIC/HEIF envoyés par les joueurs sont automatiquement redressés selon leur orientation EXIF et convertis côté serveur en WebP optimisé, garantissant un affichage parfait sur tous les navigateurs (Chrome, Firefox, Safari, Edge, Android, PC).
+
+### 04/09/2026
+- **Favicon Space Invader** : Ajout d'un favicon en pixel-art représentant le mythique Space Invader rétro et configuration de la route `/favicon.ico`.
+- **Import en masse de jeux** : Ajout de la fonctionnalité permettant de téléverser un fichier (`.txt`, `.csv`) ou de coller une liste de jeux dans l'administration, avec recherche et récupération automatique des jaquettes et captures d'écran sur l'API RAWG.io.
+- **Correction compatibilité templates** : Résolution de l'incompatibilité avec les versions récentes de Starlette/FastAPI pour le rendu des pages HTML.
+- **Lancement initial** : Création de la plateforme web rétro avec NES.css, authentification, challenges périodiques, roulette de tirage au sort, système de trophées déblocables, Hall of Fame, notifications Webhook Discord et bruitages Web Audio 8-bit.

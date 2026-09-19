@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException, status
 from fastapi.responses import RedirectResponse
@@ -56,8 +56,8 @@ async def submit_score(
     db.add(sub)
     db.commit()
 
-    # Check and award submission achievements (First Coin, Night Owl)
-    check_submission_achievements(db, current_user.id, now)
+    # Check and award submission achievements (First Coin, Night Owl, Lucky Number, Sunday Warrior, Speedy)
+    check_submission_achievements(db, current_user.id, now, score=score, challenge=challenge)
 
     # Determine current rank for notification
     leaderboard = get_challenge_leaderboard(db, challenge.id)

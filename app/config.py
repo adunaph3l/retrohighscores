@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -18,6 +18,7 @@ UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads")))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 (UPLOAD_DIR / "scores").mkdir(parents=True, exist_ok=True)
 (UPLOAD_DIR / "games").mkdir(parents=True, exist_ok=True)
+(UPLOAD_DIR / "avatars").mkdir(parents=True, exist_ok=True)
 
 # Security
 SECRET_KEY = os.getenv("SECRET_KEY", "retro-secret-arcade-token-change-in-prod-2026")

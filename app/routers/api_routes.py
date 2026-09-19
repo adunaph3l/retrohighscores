@@ -1,4 +1,4 @@
-﻿from typing import List
+from typing import List
 from fastapi import APIRouter, Request, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -16,6 +16,14 @@ async def unlock_konami(request: Request, db: Session = Depends(get_db)):
         unlocked = unlock_achievement(db, user.id, "konami_master")
         return {"status": "ok", "unlocked": unlocked, "message": "Konami code achievement awarded!"}
     return {"status": "guest", "message": "Konami code detected, connectez-vous pour conserver le trophée !"}
+
+@router.get("/easter-egg/crt")
+async def unlock_crt(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user_optional(request, db)
+    if user:
+        unlocked = unlock_achievement(db, user.id, "crt_master")
+        return {"status": "ok", "unlocked": unlocked, "message": "CRT achievement awarded!"}
+    return {"status": "guest"}
 
 @router.get("/games/search")
 async def api_search_games(q: str = Query(..., min_length=1)):

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Profil de {{ profile_user.username }}{% endblock %}
 
@@ -8,14 +8,33 @@
 
     <div class="hero-banner" style="margin-bottom: 1.5rem;">
         <div style="text-align: center; min-width: 160px;">
-            <div style="display: inline-block; padding: 1rem; border: 4px solid #ffffff; background-color: {{ profile_user.avatar_color }};">
-                <i class="nes-icon is-large user"></i>
+            <div style="display: inline-block; padding: {% if profile_user.avatar_image %}0{% else %}1rem{% endif %}; border: 4px solid #ffffff; background-color: {{ profile_user.avatar_color }}; width: 100px; height: 100px; overflow: hidden; vertical-align: middle;">
+                {% if profile_user.avatar_image %}
+                    <img src="{{ profile_user.avatar_image }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <i class="nes-icon is-large user" style="margin-top: 10px;"></i>
+                {% endif %}
             </div>
             <p style="margin-top: 0.5rem; font-size: 11px;" class="nes-text is-primary">
                 {{ profile_user.username }}
             </p>
             {% if profile_user.is_admin %}
                 <span class="nes-badge"><span class="is-error">ADMIN</span></span>
+            {% endif %}
+
+            {% if current_user and current_user.id == profile_user.id %}
+                <div style="margin-top: 0.8rem;">
+                    <details class="nes-container is-rounded is-dark" style="padding: 0.5rem; text-align: left;">
+                        <summary style="font-size: 8px; cursor: pointer; color: var(--retro-gold);">📷 Modifier mon avatar</summary>
+                        <form action="/profile/avatar" method="post" enctype="multipart/form-data" style="margin-top: 0.5rem;">
+                            <input type="file" name="avatar" class="nes-input is-dark" accept="image/*,.heic,.heif" required style="font-size: 8px; padding: 4px;" onchange="previewAvatar(event)">
+                            <div id="avatar-preview-box" style="display: none; text-align: center; margin-top: 0.4rem;">
+                                <img id="avatar-preview-img" src="" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #fff;">
+                            </div>
+                            <button type="submit" class="nes-btn is-success" style="font-size: 8px; width: 100%; margin-top: 0.4rem; padding: 4px;">ENVOYER</button>
+                        </form>
+                    </details>
+                </div>
             {% endif %}
         </div>
 
@@ -51,9 +70,12 @@
     <div class="trophy-grid">
         {% for ach in all_achievements %}
             {% set is_unlocked = ach.id in unlocked_ids %}
+            {% set is_secret_locked = (ach.category == 'secret' and not is_unlocked) %}
             <div class="trophy-card {% if not is_unlocked %}is-locked{% endif %}">
                 <div class="trophy-icon">
-                    {% if ach.icon == 'coin' %}<i class="nes-icon coin is-medium"></i>
+                    {% if is_secret_locked %}
+                        ❓
+                    {% elif ach.icon == 'coin' %}<i class="nes-icon coin is-medium"></i>
                     {% elif ach.icon == 'star' %}<i class="nes-icon star is-medium"></i>
                     {% elif ach.icon == 'heart' %}<i class="nes-icon heart is-medium"></i>
                     {% elif ach.icon == 'gem' %}💎
@@ -61,13 +83,23 @@
                     {% endif %}
                 </div>
                 <h4 style="font-size: 10px; margin-bottom: 0.4rem; color: var(--retro-gold);">
-                    {{ ach.title }}
+                    {% if is_secret_locked %}
+                        ??? (Secret)
+                    {% else %}
+                        {{ ach.title }}
+                    {% endif %}
                 </h4>
                 <p style="font-size: 8px; color: #ccc; margin-bottom: 0.5rem; min-height: 35px;">
-                    {{ ach.description }}
+                    {% if is_secret_locked %}
+                        « Succès secret... À vous de trouver comment le débloquer ! »
+                    {% else %}
+                        {{ ach.description }}
+                    {% endif %}
                 </p>
                 {% if is_unlocked %}
                     <span class="nes-badge"><span class="{{ ach.badge_class }}">DÉBLOQUÉ</span></span>
+                {% elif is_secret_locked %}
+                    <span class="nes-badge"><span class="is-dark">MYSTÈRE</span></span>
                 {% else %}
                     <span class="nes-badge"><span class="is-dark">VERROUILLÉ</span></span>
                 {% endif %}
@@ -141,4 +173,25 @@
         </menu>
     </form>
 </dialog>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function previewAvatar(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const box = document.getElementById('avatar-preview-box');
+    const img = document.getElementById('avatar-preview-img');
+    if (file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+        box.style.display = 'none';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        img.src = e.target.result;
+        box.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+</script>
 {% endblock %}

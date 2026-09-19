@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 from sqlalchemy import (
     Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Float
 )
@@ -15,6 +15,7 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     total_points = Column(Integer, default=0, index=True)
     avatar_color = Column(String(20), default="#e76e55")
+    avatar_image = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     submissions = relationship("ScoreSubmission", back_populates="user", cascade="all, delete-orphan")

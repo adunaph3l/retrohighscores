@@ -1,4 +1,4 @@
-﻿// Easter Eggs: Konami Code, CRT Mode, Pixel Confetti
+// Easter Eggs: Konami Code, CRT Mode, Pixel Confetti
 
 // 1. CRT Scanlines Toggle
 function initCrtMode() {
@@ -15,6 +15,9 @@ function toggleCrtMode() {
     updateCrtButton();
     if (window.retroAudio) {
         window.retroAudio.playClick();
+    }
+    if (active) {
+        fetch('/api/easter-egg/crt').catch(() => {});
     }
 }
 

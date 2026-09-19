@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
 from app.models import Achievement, UserAchievement, User, ScoreSubmission, ChallengeResult
@@ -69,6 +69,46 @@ DEFAULT_ACHIEVEMENTS = [
         "icon": "gem",
         "category": "secret",
         "badge_class": "is-primary"
+    },
+    {
+        "code": "lucky_number",
+        "title": "Chiffre Porte-Bonheur",
+        "description": "Réaliser un score contenant une combinaison légendaire (777, 42 ou 1337).",
+        "icon": "star",
+        "category": "secret",
+        "badge_class": "is-warning"
+    },
+    {
+        "code": "sunday_warrior",
+        "title": "Guerrier du Dimanche",
+        "description": "Faire chauffer la borne d'arcade un dimanche matin avant 11h.",
+        "icon": "heart",
+        "category": "secret",
+        "badge_class": "is-success"
+    },
+    {
+        "code": "speedy_challenger",
+        "title": "Raid Éclair",
+        "description": "Inscrire un score moins de 2 heures après le coup d'envoi d'un nouveau défi.",
+        "icon": "coin",
+        "category": "secret",
+        "badge_class": "is-primary"
+    },
+    {
+        "code": "crt_master",
+        "title": "Maître du Cathodique",
+        "description": "Activer le filtre CRT Scanlines pour une expérience d'époque authentique.",
+        "icon": "gem",
+        "category": "secret",
+        "badge_class": "is-warning"
+    },
+    {
+        "code": "custom_avatar",
+        "title": "Nouvelle Identité",
+        "description": "Avoir téléversé sa propre photo de profil ou avatar rétro.",
+        "icon": "star",
+        "category": "secret",
+        "badge_class": "is-success"
     }
 ]
 
@@ -105,7 +145,7 @@ def unlock_achievement(db: Session, user_id: int, code: str) -> bool:
     logger.info(f"Achievement unlocked: {code} for user {user_id}")
     return True
 
-def check_submission_achievements(db: Session, user_id: int, submitted_at: datetime):
+def check_submission_achievements(db: Session, user_id: int, submitted_at: datetime, score: int = None, challenge=None):
     """Checks achievements triggered by a score submission."""
     # 1. First Coin
     sub_count = db.query(ScoreSubmission).filter(ScoreSubmission.user_id == user_id).count()
@@ -115,6 +155,22 @@ def check_submission_achievements(db: Session, user_id: int, submitted_at: datet
     # 2. Night Owl (between midnight and 5am)
     if 0 <= submitted_at.hour < 5:
         unlock_achievement(db, user_id, "night_owl")
+
+    # 3. Sunday Warrior (Sunday before 11am - weekday() 6 is Sunday)
+    if submitted_at.weekday() == 6 and submitted_at.hour < 11:
+        unlock_achievement(db, user_id, "sunday_warrior")
+
+    # 4. Lucky Number (score contains 777, 42 or 1337)
+    if score is not None:
+        score_str = str(score)
+        if "777" in score_str or "42" in score_str or "1337" in score_str:
+            unlock_achievement(db, user_id, "lucky_number")
+
+    # 5. Speedy Challenger (submission within 2 hours of challenge start)
+    if challenge and challenge.start_date:
+        diff_seconds = (submitted_at - challenge.start_date).total_seconds()
+        if 0 <= diff_seconds <= 7200:
+            unlock_achievement(db, user_id, "speedy_challenger")
 
 def check_challenge_end_achievements(db: Session, user_id: int, rank: int):
     """Checks achievements triggered at the end of a challenge."""

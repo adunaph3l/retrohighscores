@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -262,6 +262,61 @@ async def add_game_manual(
 
     return RedirectResponse(
         url="/admin/game-pool?msg=Jeu+personnalisé+ajouté+au+catalogue+!&msg_type=is-success",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+@router.get("/game/{game_id}/edit", response_class=HTMLResponse)
+async def edit_game_form(
+    request: Request,
+    game_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    game = db.query(Game).filter(Game.id == game_id).first()
+    if not game:
+        raise HTTPException(status_code=404, detail="Jeu introuvable")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/game_edit.html",
+        context={
+            "current_user": admin,
+            "game": game,
+            "flash_message": request.query_params.get("msg"),
+            "flash_type": request.query_params.get("msg_type", "is-warning")
+        }
+    )
+
+@router.post("/game/{game_id}/edit")
+async def update_game(
+    request: Request,
+    game_id: int,
+    name: str = Form(...),
+    platform: str = Form("Arcade"),
+    rawg_id: Optional[str] = Form(None),
+    cover_image: Optional[str] = Form(None),
+    screenshot_image: Optional[str] = Form(None),
+    in_random_pool: Optional[str] = Form(None),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    game = db.query(Game).filter(Game.id == game_id).first()
+    if not game:
+        raise HTTPException(status_code=404, detail="Jeu introuvable")
+
+    clean_rawg_id = int(rawg_id) if rawg_id and rawg_id.strip().isdigit() else None
+
+    game.name = name.strip()
+    game.platform = platform.strip()
+    game.rawg_id = clean_rawg_id
+    game.cover_image = cover_image.strip() if cover_image and cover_image.strip() else None
+    game.screenshot_image = screenshot_image.strip() if screenshot_image and screenshot_image.strip() else None
+    game.in_random_pool = True if in_random_pool else False
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/admin/game-pool?msg=Jeu+«+{game.name}+»+mis+à+jour+avec+succès+!&msg_type=is-success",
         status_code=status.HTTP_303_SEE_OTHER
     )
 

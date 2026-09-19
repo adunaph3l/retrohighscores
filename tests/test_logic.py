@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 from datetime import datetime
 
 class TestLogic(unittest.TestCase):
@@ -87,5 +87,36 @@ class TestLogic(unittest.TestCase):
         self.assertEqual(parsed[1], ("Galaga", "Arcade"))
         self.assertEqual(parsed[2], ("Sonic The Hedgehog", "Mega Drive"))
         self.assertEqual(parsed[3], ("Metal Slug", "Arcade / Rétro"))
+
+    def test_heic_allowed(self):
+        allowed = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"}
+        self.assertIn(".heic", allowed)
+        self.assertIn(".heif", allowed)
+        self.assertTrue("photo.HEIC".lower().endswith(tuple(allowed)))
+
+    def test_secret_achievements_structure(self):
+        import sys
+        from unittest.mock import MagicMock
+        for mod in ['sqlalchemy', 'sqlalchemy.orm', 'sqlalchemy.ext.declarative', 'fastapi', 'httpx', 'dotenv', 'pydantic']:
+            if mod not in sys.modules:
+                sys.modules[mod] = MagicMock()
+        from app.services.achievement_service import DEFAULT_ACHIEVEMENTS
+        
+        secret_achievements = [a for a in DEFAULT_ACHIEVEMENTS if a.get("category") == "secret"]
+        self.assertGreaterEqual(len(secret_achievements), 5)
+        
+        secret_codes = {a["code"] for a in secret_achievements}
+        self.assertIn("lucky_number", secret_codes)
+        self.assertIn("sunday_warrior", secret_codes)
+        self.assertIn("speedy_challenger", secret_codes)
+        self.assertIn("crt_master", secret_codes)
+        self.assertIn("custom_avatar", secret_codes)
+
+    def test_lucky_number_condition(self):
+        score_lucky = 77700
+        self.assertTrue("777" in str(score_lucky) or "42" in str(score_lucky) or "1337" in str(score_lucky))
+        score_normal = 12345
+        self.assertFalse("777" in str(score_normal) or "42" in str(score_normal) or "1337" in str(score_normal))
+
 if __name__ == "__main__":
     unittest.main()

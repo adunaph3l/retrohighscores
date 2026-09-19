@@ -63,6 +63,19 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database schema...")
     Base.metadata.create_all(bind=engine)
 
+    # Safe schema migration for SQLite (e.g. avatar_image column)
+    try:
+        with engine.connect() as conn:
+            from sqlalchemy import text
+            result = conn.execute(text("PRAGMA table_info(users)"))
+            columns = [row[1] for row in result.fetchall()]
+            if "avatar_image" not in columns:
+                logger.info("Migrating schema: adding avatar_image column to users table...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN avatar_image VARCHAR(500)"))
+                conn.commit()
+    except Exception as mig_err:
+        logger.warning(f"Schema migration note: {mig_err}")
+
     # Seed base achievements & games
     db = SessionLocal()
     try:

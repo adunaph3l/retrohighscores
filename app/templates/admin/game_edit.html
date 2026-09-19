@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier {{ game.name }} - Administration{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="/admin/game-pool" class="nes-btn is-primary" style="font-size: 9px;">&laquo; Retour au Pool de Jeux</a>
+</div>
+
+<div class="nes-container is-dark with-title">
+    <p class="title nes-text is-warning">✏️ MODIFIER LE JEU : {{ game.name }}</p>
+
+    <!-- Statut RAWG actuel -->
+    <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+            {% if game.rawg_id %}
+                <span class="nes-text is-success">✅ Associé à RAWG.io (ID: {{ game.rawg_id }})</span>
+            {% else %}
+                <span class="nes-text is-warning">⚠️ Non associé à RAWG.io (Jeu manuel ou association manquante)</span>
+            {% endif %}
+        </div>
+        <div>
+            <span class="nes-text is-disabled" style="font-size: 9px;">Créé le {{ game.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+    </div>
+
+    <!-- Section Recherche & Réassociation RAWG.io -->
+    <div class="nes-container is-rounded is-dark with-title" style="margin-bottom: 2rem; border-color: var(--retro-gold);">
+        <p class="title nes-text is-primary">🔍 CORRIGER LA CORRESPONDANCE SUR RAWG.IO</p>
+        
+        <p style="font-size: 10px; margin-bottom: 1rem;">
+            La correspondance automatique n'était pas la bonne ? Recherchez le jeu exact dans la base RAWG.io ci-dessous, puis cliquez sur <strong>« APPLIQUER CETTE CORRESPONDANCE »</strong> pour mettre à jour instantanément les informations et visuels.
+        </p>
+
+        <form id="rawg-search-form" onsubmit="searchRawgForEdit(event)">
+            <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <input type="text" id="rawg-query" class="nes-input is-dark" style="flex: 1; min-width: 220px;" value="{{ game.name }}" placeholder="Nom du jeu à chercher sur RAWG...">
+                <button type="submit" class="nes-btn is-primary">CHERCHER SUR RAWG</button>
+            </div>
+        </form>
+
+        <div id="search-loading" style="display: none; text-align: center; padding: 1rem;" class="nes-text is-warning">
+            Recherche en cours dans la base de données RAWG.io...
+        </div>
+
+        <div id="search-results" class="retro-grid" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- Formulaire d'édition directe -->
+    <div class="nes-container is-rounded is-dark with-title">
+        <p class="title nes-text is-success">📝 INFORMATIONS & VISUELS DU JEU</p>
+
+        <form action="/admin/game/{{ game.id }}/edit" method="post" id="game-edit-form">
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="game_name">NOM DU JEU :</label>
+                <input type="text" id="game_name" name="name" class="nes-input is-dark" value="{{ game.name }}" required>
+            </div>
+
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="game_platform">PLATEFORME(S) :</label>
+                <input type="text" id="game_platform" name="platform" class="nes-input is-dark" value="{{ game.platform or 'Arcade / Rétro' }}" required>
+            </div>
+
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="game_rawg_id">IDENTIFIANT RAWG.IO (ID) :</label>
+                <div style="display: flex; gap: 0.8rem; align-items: center;">
+                    <input type="number" id="game_rawg_id" name="rawg_id" class="nes-input is-dark" style="flex: 1;" value="{{ game.rawg_id or '' }}" placeholder="ID RAWG (ex: 3498)">
+                    <button type="button" class="nes-btn is-error" style="font-size: 8px;" onclick="clearRawgId()">DISSOCIER</button>
+                </div>
+                <p style="font-size: 8px; color: #aaa; margin-top: 4px;">
+                    L'ID RAWG relie ce jeu à la base de données internationale. Videz ce champ pour un jeu rétro maison non référencé.
+                </p>
+            </div>
+
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="game_cover">URL JAQUETTE / COVER :</label>
+                <input type="url" id="game_cover" name="cover_image" class="nes-input is-dark" value="{{ game.cover_image or '' }}" placeholder="https://..." oninput="updateCoverPreview()">
+                
+                <div style="margin-top: 0.8rem; text-align: center;">
+                    <p style="font-size: 9px; color: var(--retro-gold); margin-bottom: 4px;">Aperçu de la jaquette :</p>
+                    <img id="cover-preview" 
+                         src="{{ game.cover_image or '/static/img/default-game.svg' }}" 
+                         alt="Aperçu Jaquette" 
+                         style="max-width: 220px; max-height: 140px; object-fit: cover; border: 2px solid #fff;" 
+                         onerror="this.src='/static/img/default-game.svg';">
+                </div>
+            </div>
+
+            <div class="nes-field" style="margin-bottom: 1.2rem;">
+                <label for="game_screenshot">URL CAPTURE D'ÉCRAN DU JEU (SCREENSHOT) :</label>
+                <input type="url" id="game_screenshot" name="screenshot_image" class="nes-input is-dark" value="{{ game.screenshot_image or '' }}" placeholder="https://..." oninput="updateScreenshotPreview()">
+                
+                <div style="margin-top: 0.8rem; text-align: center;">
+                    <p style="font-size: 9px; color: var(--retro-gold); margin-bottom: 4px;">Aperçu de la capture d'écran :</p>
+                    <img id="screenshot-preview" 
+                         src="{{ game.screenshot_image or '/static/img/default-game.svg' }}" 
+                         alt="Aperçu Screenshot" 
+                         style="max-width: 260px; max-height: 160px; object-fit: cover; border: 2px solid #fff;" 
+                         onerror="this.src='/static/img/default-game.svg';">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer;">
+                    <input type="checkbox" class="nes-checkbox is-dark" name="in_random_pool" value="true" {% if game.in_random_pool %}checked{% endif %}>
+                    <span>Actif dans la roulette de tirage aléatoire des challenges</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+                <button type="submit" class="nes-btn is-success" style="font-size: 11px;">
+                    💾 ENREGISTRER LES MODIFICATIONS
+                </button>
+                <a href="/admin/game-pool" class="nes-btn" style="font-size: 11px;">
+                    ANNULER
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function updateCoverPreview() {
+    const url = document.getElementById('game_cover').value.trim();
+    const preview = document.getElementById('cover-preview');
+    preview.src = url || '/static/img/default-game.svg';
+}
+
+function updateScreenshotPreview() {
+    const url = document.getElementById('game_screenshot').value.trim();
+    const preview = document.getElementById('screenshot-preview');
+    preview.src = url || '/static/img/default-game.svg';
+}
+
+function clearRawgId() {
+    document.getElementById('game_rawg_id').value = '';
+    alert('Association RAWG retirée pour ce jeu. Enregistrez le formulaire pour valider.');
+}
+
+function applyRawgSelection(name, platform, rawgId, cover, screenshot) {
+    if (confirm(`Appliquer la correspondance avec « ${name} » ?\nCela mettra à jour les informations et visuels du formulaire.`)) {
+        document.getElementById('game_name').value = name;
+        document.getElementById('game_platform').value = platform;
+        document.getElementById('game_rawg_id').value = rawgId;
+        document.getElementById('game_cover').value = cover;
+        document.getElementById('game_screenshot').value = screenshot;
+
+        updateCoverPreview();
+        updateScreenshotPreview();
+
+        // Scroll smoothly to the edit form
+        document.getElementById('game-edit-form').scrollIntoView({ behavior: 'smooth' });
+        
+        if (window.retroAudio) {
+            window.retroAudio.playCoin();
+        }
+    }
+}
+
+async function searchRawgForEdit(event) {
+    event.preventDefault();
+    const query = document.getElementById('rawg-query').value.trim();
+    if (!query) return;
+
+    const loading = document.getElementById('search-loading');
+    const resultsContainer = document.getElementById('search-results');
+    loading.style.display = 'block';
+    resultsContainer.innerHTML = '';
+
+    try {
+        const res = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`);
+        const games = await res.json();
+        loading.style.display = 'none';
+
+        if (!games || games.length === 0) {
+            resultsContainer.innerHTML = '<p class="nes-text is-disabled" style="grid-column: 1/-1; text-align: center; padding: 1rem;">Aucun jeu trouvé sur RAWG.io pour cette recherche.</p>';
+            return;
+        }
+
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'nes-container is-rounded is-dark';
+            card.style.padding = '0.8rem';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.justifyContent = 'space-between';
+
+            const coverUrl = g.cover_image || '/static/img/default-game.svg';
+            const screenshotUrl = g.screenshot_image || coverUrl;
+            const safeName = (g.name || '').replace(/'/g, "\\'");
+            const safePlatform = (g.platform || 'Arcade / Rétro').replace(/'/g, "\\'");
+            const rawgId = g.rawg_id || '';
+
+            card.innerHTML = `
+                <div>
+                    <img src="${coverUrl}" style="width: 100%; height: 120px; object-fit: cover; border: 2px solid #fff; margin-bottom: 0.5rem;" onerror="this.src='/static/img/default-game.svg';">
+                    <h4 style="font-size: 10px; color: var(--retro-gold); margin-bottom: 4px;">${g.name}</h4>
+                    <p style="font-size: 8px; color: #aaa; margin-bottom: 4px;">${g.platform}</p>
+                    ${g.released ? `<p style="font-size: 8px; color: #888; margin-bottom: 0.5rem;">Sortie : ${g.released.substring(0, 4)}</p>` : ''}
+                </div>
+                <button type="button" class="nes-btn is-success" style="width: 100%; font-size: 8px; margin-top: 0.5rem;"
+                    onclick="applyRawgSelection('${safeName}', '${safePlatform}', '${rawgId}', '${coverUrl}', '${screenshotUrl}')">
+                    🔄 APPLIQUER CETTE CORRESPONDANCE
+                </button>
+            `;
+            resultsContainer.appendChild(card);
+        });
+
+    } catch (err) {
+        loading.style.display = 'none';
+        resultsContainer.innerHTML = '<p class="nes-text is-error">Erreur lors de la recherche RAWG.io.</p>';
+        console.error(err);
+    }
+}
+</script>
+{% endblock %}

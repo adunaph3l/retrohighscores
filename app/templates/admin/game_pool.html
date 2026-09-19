@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Pool de Jeux & Tirage Aléatoire{% endblock %}
 
@@ -101,14 +101,14 @@
 
         {% if games %}
             <div class="table-responsive">
-                <table class="nes-table is-bordered is-dark is-centered">
+                <table class="nes-table is-bordered is-dark is-centered" style="table-layout: auto; width: 100%;">
                     <thead>
                         <tr>
-                            <th>Visuel</th>
+                            <th style="width: 70px;">Visuel</th>
                             <th>Nom du Jeu</th>
-                            <th>Plateforme</th>
-                            <th>Dans la roulette ?</th>
-                            <th>Action</th>
+                            <th style="width: 140px;">Plateforme</th>
+                            <th style="width: 130px;">Dans la roulette ?</th>
+                            <th style="width: 190px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,8 +121,10 @@
                                          onerror="this.src='/static/img/default-game.svg';">
                                 </td>
                                 <td><strong>{{ g.name }}</strong></td>
-                                <td><span class="nes-badge"><span class="is-primary">{{ g.platform }}</span></span></td>
-                                <td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <span class="retro-platform-tag" style="display: inline-block; padding: 4px 8px; font-size: 8px; line-height: 1.2; background: #209cee; color: #fff; border: 2px solid #fff; box-shadow: 2px 2px 0 #000; max-width: 130px; white-space: normal; word-break: break-word;">{{ g.platform }}</span>
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
                                     {% if g.in_random_pool %}
                                         <span class="nes-text is-success">OUI ✅</span>
                                     {% else %}
@@ -130,12 +132,15 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.4rem; justify-content: center;">
-                                        <a href="/admin/challenge/new?game_id={{ g.id }}" class="nes-btn is-warning" style="font-size: 8px; padding: 4px 6px;">
+                                    <div style="display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
+                                        <a href="/admin/challenge/new?game_id={{ g.id }}" class="nes-btn is-warning" style="font-size: 8px; padding: 4px 6px;" title="Lancer un défi sur ce jeu">
                                             DÉFI
                                         </a>
+                                        <a href="/admin/game/{{ g.id }}/edit" class="nes-btn is-primary" style="font-size: 8px; padding: 4px 6px;" title="Modifier les informations et la correspondance RAWG.io">
+                                            ÉDITER
+                                        </a>
                                         <form action="/admin/game/{{ g.id }}/delete" method="post" onsubmit="return confirm('Supprimer ce jeu du catalogue ?');">
-                                            <button type="submit" class="nes-btn is-error" style="font-size: 8px; padding: 4px 6px;">
+                                            <button type="submit" class="nes-btn is-error" style="font-size: 8px; padding: 4px 6px;" title="Supprimer">
                                                 SUPPR
                                             </button>
                                         </form>

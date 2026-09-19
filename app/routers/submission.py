@@ -9,6 +9,7 @@ from app.auth import get_current_user
 from app.services.image_service import save_score_screenshot
 from app.services.achievement_service import check_submission_achievements
 from app.services.discord_service import notify_score_submitted
+from app.services.email_service import notify_score_submitted_email
 from app.services.scoring_service import get_challenge_leaderboard
 
 router = APIRouter(prefix="/challenge", tags=["Submissions"])
@@ -75,6 +76,17 @@ async def submit_score(
     # Notify Discord
     game_name = challenge.game.name if challenge.game else "Jeu Rétro"
     await notify_score_submitted(
+        username=current_user.username,
+        game_name=game_name,
+        score=score,
+        rank=rank,
+        screenshot_url=full_screenshot_url,
+        site_url=challenge_url
+    )
+
+    # Notify Email (to all registered players if enabled)
+    await notify_score_submitted_email(
+        db=db,
         username=current_user.username,
         game_name=game_name,
         score=score,

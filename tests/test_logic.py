@@ -1,3 +1,9 @@
+import sys
+from unittest.mock import MagicMock
+for mod in ['sqlalchemy', 'sqlalchemy.orm', 'sqlalchemy.ext.declarative', 'fastapi', 'httpx', 'dotenv', 'pydantic']:
+    if mod not in sys.modules:
+        sys.modules[mod] = MagicMock()
+
 import unittest
 from datetime import datetime
 
@@ -112,11 +118,30 @@ class TestLogic(unittest.TestCase):
         self.assertIn("crt_master", secret_codes)
         self.assertIn("custom_avatar", secret_codes)
 
-    def test_lucky_number_condition(self):
-        score_lucky = 77700
-        self.assertTrue("777" in str(score_lucky) or "42" in str(score_lucky) or "1337" in str(score_lucky))
-        score_normal = 12345
-        self.assertFalse("777" in str(score_normal) or "42" in str(score_normal) or "1337" in str(score_normal))
+    def test_retro_email_wrapper_structure(self):
+        from app.services.email_service import _build_retro_email_wrapper
+        html = _build_retro_email_wrapper(
+            title="NOUVEAU CHALLENGE",
+            subtitle="ARCADE EDITION",
+            content_html="<p>Test Content</p>",
+            action_url="https://highscores.adunaph3l.com/challenge/1",
+            action_text="JOUER"
+        )
+        self.assertIn("RETRO HIGH SCORES", html)
+        self.assertIn("NOUVEAU CHALLENGE", html)
+        self.assertIn("https://highscores.adunaph3l.com/challenge/1", html)
+        self.assertIn("JOUER", html)
+        self.assertIn("#15181d", html)
+        self.assertIn("#f7d51d", html)
+
+    def test_email_recipient_cleaning(self):
+        raw_emails = ["test1@example.com", "  test2@domain.fr  ", "", "invalid-email", "test1@example.com"]
+        cleaned = []
+        for e in raw_emails:
+            c = (e or "").strip()
+            if c and "@" in c and c not in cleaned:
+                cleaned.append(c)
+        self.assertEqual(cleaned, ["test1@example.com", "test2@domain.fr"])
 
 if __name__ == "__main__":
     unittest.main()

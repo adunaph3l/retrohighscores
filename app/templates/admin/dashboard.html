@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Administration Arcade{% endblock %}
 
@@ -58,6 +58,196 @@
                 </a>
             </div>
         {% endif %}
+    </div>
+
+    <!-- Gestion des Utilisateurs Inscrits -->
+    <div class="nes-container is-dark with-title" style="margin-bottom: 2rem;">
+        <p class="title nes-text is-warning">👥 JOUEURS INSCRITS ({{ users|length }})</p>
+
+        {% if users %}
+            <div class="table-responsive">
+                <table class="nes-table is-bordered is-dark is-centered" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Joueur</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Points</th>
+                            <th>Inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                            <tr>
+                                <td>
+                                    {% if u.avatar_image %}
+                                        <img src="{{ u.avatar_image }}" alt="{{ u.username }}" style="width: 26px; height: 26px; object-fit: cover; border: 1px solid #ffffff;">
+                                    {% else %}
+                                        <span style="display: inline-block; width: 26px; height: 26px; background-color: {{ u.avatar_color or '#e76e55' }}; border: 1px solid #fff; line-height: 26px; font-size: 11px;">👾</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/profile/{{ u.username }}" class="nes-text is-primary" style="text-decoration: underline; font-weight: bold;">
+                                        {{ u.username }}
+                                    </a>
+                                </td>
+                                <td style="font-size: 10px; font-family: monospace;">
+                                    {% if u.email %}
+                                        {{ u.email }}
+                                    {% else %}
+                                        <span class="nes-text is-disabled">Non renseigné</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if u.is_admin %}
+                                        <span class="nes-text is-error" style="font-weight: bold; font-size: 10px;">⭐ ADMIN</span>
+                                    {% else %}
+                                        <span class="nes-text is-success" style="font-size: 10px;">JOUEUR</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="nes-text is-warning" style="font-size: 11px; font-weight: bold;">
+                                        {{ "{:,}".format(u.total_points).replace(",", " ") }} pts
+                                    </span>
+                                </td>
+                                <td style="font-size: 9px;">
+                                    {{ u.created_at.strftime('%d/%m/%Y') if u.created_at else '-' }}
+                                </td>
+                                <td>
+                                    <form action="/admin/user/{{ u.id }}/toggle-admin" method="post" style="display:inline;" onsubmit="return confirm('Modifier le rôle de {{ u.username }} ?');">
+                                        {% if u.is_admin %}
+                                            <button type="submit" class="nes-btn is-warning" style="font-size: 8px; padding: 4px 6px;">
+                                                ⬇ Rétrograder
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="nes-btn is-primary" style="font-size: 8px; padding: 4px 6px;">
+                                                ⬆ Promouvoir Admin
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="nes-text is-disabled" style="text-align: center; padding: 1rem;">Aucun utilisateur inscrit.</p>
+        {% endif %}
+    </div>
+
+    <!-- Configuration Notifications Email & SMTP -->
+    <div class="nes-container is-dark with-title" style="margin-bottom: 2rem; border-color: #209cee;">
+        <p class="title nes-text is-primary">📧 NOTIFICATIONS EMAIL &amp; SERVEUR SMTP</p>
+
+        <!-- Formulaire de configuration SMTP -->
+        <form action="/admin/settings/email" method="post">
+            <div style="background-color: #1a1c23; border: 2px solid #ffffff; padding: 1rem; margin-bottom: 1.5rem;">
+                <p style="color: #f7d51d; font-size: 11px; margin-bottom: 1rem; font-weight: bold;">
+                    ⚙️ ACTIVATION GLOBALE &amp; ÉVÉNEMENTS NOTIFIÉS PAR EMAIL
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" class="nes-checkbox is-dark" name="enabled" value="on" {% if email_settings.enabled %}checked{% endif %} />
+                        <span style="font-size: 11px; color: #92cc41; font-weight: bold;">ACTIVER LES NOTIFICATIONS EMAIL AUTOMATIQUES</span>
+                    </label>
+
+                    <div style="margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="nes-checkbox is-dark" name="notify_challenge_started" value="on" {% if email_settings.notify_challenge_started %}checked{% endif %} />
+                            <span style="font-size: 10px;">🕹️ Lancement d'un nouveau challenge (règles, jeu, dates)</span>
+                        </label>
+
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="nes-checkbox is-dark" name="notify_score_submitted" value="on" {% if email_settings.notify_score_submitted %}checked{% endif %} />
+                            <span style="font-size: 10px;">⚡ Nouveau record / high score soumis par un joueur</span>
+                        </label>
+
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="nes-checkbox is-dark" name="notify_challenge_ended" value="on" {% if email_settings.notify_challenge_ended %}checked{% endif %} />
+                            <span style="font-size: 10px;">🏁 Clôture de challenge &amp; podium final (attribution des points)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paramètres techniques SMTP -->
+            <p style="color: #f7d51d; font-size: 11px; margin-bottom: 0.8rem; font-weight: bold;">
+                🔌 PARAMÈTRES DU SERVEUR D'ENVOI (SMTP)
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="nes-field">
+                    <label for="smtp_host" style="font-size: 10px;">Serveur SMTP (Hôte)</label>
+                    <input type="text" id="smtp_host" name="smtp_host" class="nes-input is-dark" value="{{ email_settings.smtp_host or '' }}" placeholder="ex: smtp.gmail.com ou mail.mondomaine.com" style="font-size: 11px;">
+                </div>
+
+                <div class="nes-field">
+                    <label for="smtp_port" style="font-size: 10px;">Port SMTP</label>
+                    <input type="number" id="smtp_port" name="smtp_port" class="nes-input is-dark" value="{{ email_settings.smtp_port or 587 }}" style="font-size: 11px;">
+                </div>
+
+                <div class="nes-field">
+                    <label for="smtp_user" style="font-size: 10px;">Identifiant SMTP / Utilisateur</label>
+                    <input type="text" id="smtp_user" name="smtp_user" class="nes-input is-dark" value="{{ email_settings.smtp_user or '' }}" placeholder="ex: moncompte@gmail.com" style="font-size: 11px;">
+                </div>
+
+                <div class="nes-field">
+                    <label for="smtp_password" style="font-size: 10px;">Mot de passe SMTP</label>
+                    <input type="password" id="smtp_password" name="smtp_password" class="nes-input is-dark" placeholder="{% if email_settings.smtp_password %}•••••••• (inchangé si vide){% else %}Mot de passe ou App Password{% endif %}" style="font-size: 11px;">
+                </div>
+
+                <div class="nes-field">
+                    <label for="smtp_from_email" style="font-size: 10px;">Email Expéditeur (From)</label>
+                    <input type="email" id="smtp_from_email" name="smtp_from_email" class="nes-input is-dark" value="{{ email_settings.smtp_from_email or '' }}" placeholder="ex: highscores@mondomaine.com" style="font-size: 11px;">
+                </div>
+
+                <div class="nes-field">
+                    <label for="smtp_from_name" style="font-size: 10px;">Nom Expéditeur</label>
+                    <input type="text" id="smtp_from_name" name="smtp_from_name" class="nes-input is-dark" value="{{ email_settings.smtp_from_name or 'Retro High Scores' }}" style="font-size: 11px;">
+                </div>
+            </div>
+
+            <!-- Options Sécurité -->
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" class="nes-checkbox is-dark" name="smtp_use_tls" value="on" {% if email_settings.smtp_use_tls %}checked{% endif %} />
+                    <span style="font-size: 10px;">Activer STARTTLS (Recommandé port 587)</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" class="nes-checkbox is-dark" name="smtp_use_ssl" value="on" {% if email_settings.smtp_use_ssl %}checked{% endif %} />
+                    <span style="font-size: 10px;">Activer SSL Direct (Recommandé port 465)</span>
+                </label>
+            </div>
+
+            <button type="submit" class="nes-btn is-success" style="font-size: 11px;">
+                💾 ENREGISTRER LA CONFIGURATION EMAIL
+            </button>
+        </form>
+
+        <hr style="border: 1px dashed #444; margin: 2rem 0;">
+
+        <!-- Test d'envoi d'email -->
+        <p style="color: #209cee; font-size: 11px; margin-bottom: 0.8rem; font-weight: bold;">
+            🧪 TESTER L'ENVOI D'UN EMAIL RÉTRO
+        </p>
+        <p style="font-size: 10px; color: #aaaaaa; margin-bottom: 1rem;">
+            Envoie un email de test complet avec le gabarit rétro arcade pour valider la communication avec votre serveur SMTP.
+        </p>
+
+        <form action="/admin/email/test" method="post" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 250px;">
+                <label for="target_email" style="font-size: 10px;">Adresse email destinataire du test</label>
+                <input type="email" id="target_email" name="target_email" class="nes-input is-dark" required placeholder="votre-email@exemple.com" style="font-size: 11px;">
+            </div>
+            <button type="submit" class="nes-btn is-primary" style="font-size: 11px;">
+                📨 ENVOYER L'EMAIL DE TEST
+            </button>
+        </form>
     </div>
 
     <!-- Dernières Soumissions de Scores -->

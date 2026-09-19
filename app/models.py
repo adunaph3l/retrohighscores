@@ -108,3 +108,21 @@ class UserAchievement(Base):
 
     user = relationship("User", back_populates="user_achievements")
     achievement = relationship("Achievement", back_populates="user_achievements")
+
+class EmailSetting(Base):
+    __tablename__ = "email_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    smtp_host = Column(String(255), nullable=True)
+    smtp_port = Column(Integer, default=587)
+    smtp_user = Column(String(255), nullable=True)
+    smtp_password = Column(String(255), nullable=True)
+    smtp_from_email = Column(String(255), nullable=True)
+    smtp_from_name = Column(String(100), default="Retro High Scores")
+    smtp_use_tls = Column(Boolean, default=True)
+    smtp_use_ssl = Column(Boolean, default=False)
+    enabled = Column(Boolean, default=False)
+    notify_challenge_started = Column(Boolean, default=True)
+    notify_score_submitted = Column(Boolean, default=True)
+    notify_challenge_ended = Column(Boolean, default=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

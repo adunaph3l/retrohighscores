@@ -1,10 +1,11 @@
-﻿from typing import List, Dict, Any
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app.models import Challenge, ScoreSubmission, ChallengeResult, User
 from app.config import POINTS_DISTRIBUTION, PARTICIPATION_POINTS
 from app.services.achievement_service import check_challenge_end_achievements
 from app.services.discord_service import notify_challenge_ended
+from app.services.email_service import notify_challenge_ended_email
 
 def get_challenge_leaderboard(db: Session, challenge_id: int) -> List[Dict[str, Any]]:
     """
@@ -87,8 +88,9 @@ async def close_challenge_and_award_points(db: Session, challenge: Challenge, si
     challenge.points_awarded = True
     db.commit()
 
-    # Discord notification
+    # Notifications
     game_name = challenge.game.name if challenge.game else "Jeu Rétro"
     await notify_challenge_ended(challenge.title, game_name, podium_for_discord, site_url=site_url)
+    await notify_challenge_ended_email(db, challenge.title, game_name, podium_for_discord, site_url=site_url)
 
     return leaderboard
